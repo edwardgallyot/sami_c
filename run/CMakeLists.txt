@@ -1,6 +1,16 @@
 add_executable(run main.c)
-target_link_libraries(run sami)
-target_include_directories(run PRIVATE ..)
+
+target_link_libraries(run
+PRIVATE
+    sami
+    PortAudio
+    portmidi
+)
+target_include_directories(run
+PRIVATE
+    ..
+    ../lib
+)
 
 add_custom_target(sami_run
     COMMAND ${CMAKE_COMMAND} -E echo "=== Running the 'run' executable ==="
