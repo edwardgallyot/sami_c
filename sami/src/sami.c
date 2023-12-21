@@ -1,12 +1,11 @@
 // Copyright 2023 edg
 
-#include <stdio.h>
-
 #include "src/sami.h"
 
-int sami_init(bool say_hello) {
-        if (say_hello)
-                printf("Hello sami\n");
-
-        return 0;
+sami_engine* sami_create_engine() {
+        return sami_engine_create_engine();
 }
+i32 sami_destroy_engine(sami_engine* engine) {
+        return sami_engine_free_engine(engine);
+}
+

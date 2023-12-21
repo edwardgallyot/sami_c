@@ -1,2 +1,11 @@
-add_library(sami src/sami.c)
-target_include_directories(sami PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(
+sami
+    src/sami.c
+    src/engine/engine.c
+    src/state/state.c
+)
+target_include_directories(sami
+PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ..
+)

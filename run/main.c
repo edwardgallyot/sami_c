@@ -6,11 +6,18 @@
 #include "portaudio/include/portaudio.h"
 
 int main(void) {
+        sami_engine* engine = sami_create_engine();
         Pa_Initialize();
 
         int v = Pa_GetVersion();
 
         printf("%d\n", v);
-        sami_init(true);
+
+        // TODO(edg): Hot Reloading!
+
+        if (sami_destroy_engine(engine) != 0) {
+                return -1;
+        }
+
         return 0;
 }
