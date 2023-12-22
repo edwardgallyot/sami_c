@@ -30,5 +30,10 @@ sami_engine* sami_create_engine();
 i32 sami_destroy_engine(sami_engine* engine);
 
 
+/*
+ * @brief reloads the engine from either a nullptr or a pointer
+ *
+ **/
 void* sami_engine_reload(void* reload);
 
+void* sami_engine_quit(void* engine);

@@ -1,14 +1,16 @@
 // Copyright 2023 edg
 
-#include "src/state/state.h"
-
 #include <stdlib.h>
 
-typedef struct sami_state {
-} sami_state;
+#include "src/state/state.h"
 
 sami_state* sami_create_state() {
         sami_state* state = (sami_state*)malloc(sizeof(sami_state));
+
+        if (state == NULL)
+                return state;
+
+        state->counter = 0;
         return state;
 }
 

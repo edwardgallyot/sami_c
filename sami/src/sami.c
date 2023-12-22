@@ -16,10 +16,20 @@ i32 sami_destroy_engine(sami_engine* engine) {
 }
 
 void* sami_engine_reload(void* engine) {
-        printf("just loading my tings.\n");
+        if (engine == NULL)
+                engine = sami_create_engine();
 
-        if (engine != NULL)
-                sami_destroy_engine(engine);
+        sami_engine* eng = (sami_engine*)engine;
 
-        return sami_create_engine();
+        printf("Reload!\n");
+        printf("%d\n", eng->state->counter);
+
+        eng->state->counter++;
+
+        return eng;
+}
+
+void* sami_engine_quit(void* engine) {
+        sami_destroy_engine(engine);
+        return NULL;
 }

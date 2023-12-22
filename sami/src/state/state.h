@@ -4,7 +4,9 @@
 
 #include "utils/types.h"
 
-typedef struct sami_state sami_state;
+typedef struct sami_state {
+        i32 counter;
+} sami_state;
 
 sami_state* sami_create_state();
 
