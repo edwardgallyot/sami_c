@@ -16,11 +16,9 @@ sami_engine* sami_engine_create_engine() {
 }
 
 i32 sami_engine_free_engine(sami_engine* engine) {
-        if (engine == NULL) {
+        if (engine == NULL) 
                 return -1;
-        }
 
         free(engine);
-
         return 0;
 }

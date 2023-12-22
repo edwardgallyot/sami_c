@@ -1,8 +1,10 @@
-add_executable(run main.c)
+add_executable(run
+    src/main.c
+    src/hot_reload/hot_reload.c
+)
 
 target_link_libraries(run
 PRIVATE
-    sami
     PortAudio
     portmidi
 )
@@ -10,6 +12,7 @@ target_include_directories(run
 PRIVATE
     ..
     ../lib
+    .
 )
 
 add_custom_target(sami_run

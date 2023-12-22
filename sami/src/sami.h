@@ -28,3 +28,7 @@ sami_engine* sami_create_engine();
  * returns 0 if successful.
  **/
 i32 sami_destroy_engine(sami_engine* engine);
+
+
+void* sami_engine_reload(void* reload);
+
