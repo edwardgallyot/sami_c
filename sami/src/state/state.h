@@ -6,6 +6,7 @@
 
 typedef struct sami_state {
         i32 counter;
+        i32 counter2;
 } sami_state;
 
 sami_state* sami_create_state();

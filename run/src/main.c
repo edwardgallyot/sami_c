@@ -7,9 +7,10 @@
 #include "portaudio/include/portaudio.h"
 #include "src/hot_reload/hot_reload.h"
 
-static const char* lib_path = "./sami/libsami.so";
-static const char* entry_point = "sami_engine_reload";
-static const char* exit_point = "sami_engine_quite";
+static const char* lib_path = "/home/edgallyot/dev/sami_c/build/sami/libsami.so";
+static const char* load = "sami_engine_reload";
+static const char* refresh = "sami_engine_refresh";
+static const char* destroy = "sami_engine_quit";
 
 
 int main(void) {
@@ -23,10 +24,14 @@ int main(void) {
 
         void* e = NULL;
 
-        if (init_hot_reloader(e, lib_path, entry_point, exit_point) != 0)
+        if (init_hot_reloader(e, lib_path, load, refresh, destroy) != 0)
                 return -1;
 
-        run_hot_reloader();
+        i32 err = run_hot_reloader();
+
+        if (err != 0) {
+                printf("Error running hot reloader.");
+        }
 
         return 0;
 }

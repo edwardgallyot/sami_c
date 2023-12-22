@@ -15,8 +15,15 @@ sami ${LIB_TYPE}
     src/engine/engine.c
     src/state/state.c
 )
+
+target_link_libraries(sami
+PRIVATE
+    utils
+)
+
 target_include_directories(sami
 PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ..
 )
+

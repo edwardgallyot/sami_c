@@ -7,6 +7,7 @@ target_link_libraries(run
 PRIVATE
     PortAudio
     portmidi
+    utils
 )
 target_include_directories(run
 PRIVATE

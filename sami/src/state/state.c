@@ -11,6 +11,7 @@ sami_state* sami_create_state() {
                 return state;
 
         state->counter = 0;
+        state->counter2 = 1;
         return state;
 }
 

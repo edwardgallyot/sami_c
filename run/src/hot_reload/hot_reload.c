@@ -8,14 +8,22 @@
 #include <sys/select.h>
 
 #include "src/hot_reload/hot_reload.h"
+#include "utils/log.h"
 
 #define MAX_CHAR_BUFFER_SIZE (100)
 
 static char file_path[MAX_CHAR_BUFFER_SIZE];
-static char entry_point[MAX_CHAR_BUFFER_SIZE];
-static char exit_point[MAX_CHAR_BUFFER_SIZE];
+static char load_name[MAX_CHAR_BUFFER_SIZE];
+static char refresh_name[MAX_CHAR_BUFFER_SIZE];
+static char destroy_name[MAX_CHAR_BUFFER_SIZE];
 
-#define QUIT_FROM_TERMINAL (1)
+typedef enum {
+        hot_reload_err = -1,
+        hot_reload_nothing = 0,
+        hot_reload_quit = 1,
+        hot_reload_reload = 2,
+        hot_reload_refresh = 3,
+} hot_reload_action;
 
 static void* state;
 
@@ -23,55 +31,77 @@ static void* lib_handle;
 
 typedef void* (shared_func)(void*);
 
-static shared_func* reload_func;
-static shared_func* quit_func;
+shared_func* func;
 
-i32 init_hot_reloader(void* s, const char* file, const char* entry, const char* exit) {
+i32 init_hot_reloader(
+        void* s,
+        const char* file,
+        const char* load,
+        const char* refresh,
+        const char* destroy
+) {
         memset(file_path, 0, sizeof(file_path));
-        memset(entry_point, 0, sizeof(entry_point));
-        memset(exit_point, 0, sizeof(exit_point));
+        memset(load_name, 0, sizeof(load_name));
+        memset(destroy_name, 0, sizeof(destroy_name));
+        memset(refresh_name, 0, sizeof(refresh_name));
 
         if (strnlen(file,  MAX_CHAR_BUFFER_SIZE) >= MAX_CHAR_BUFFER_SIZE)
                 return -1;
 
-        if (strnlen(entry,  MAX_CHAR_BUFFER_SIZE) >= MAX_CHAR_BUFFER_SIZE)
+        if (strnlen(load,  MAX_CHAR_BUFFER_SIZE) >= MAX_CHAR_BUFFER_SIZE)
                 return -1;
 
-        if (strnlen(exit,  MAX_CHAR_BUFFER_SIZE) >= MAX_CHAR_BUFFER_SIZE)
+        if (strnlen(destroy,  MAX_CHAR_BUFFER_SIZE) >= MAX_CHAR_BUFFER_SIZE)
+                return -1;
+
+        if (strnlen(refresh,  MAX_CHAR_BUFFER_SIZE) >= MAX_CHAR_BUFFER_SIZE)
                 return -1;
 
         strncpy(file_path, file, MAX_CHAR_BUFFER_SIZE);
-        strncpy(entry_point, entry, MAX_CHAR_BUFFER_SIZE);
-        strncpy(exit_point, exit, MAX_CHAR_BUFFER_SIZE);
+        strncpy(load_name, load, MAX_CHAR_BUFFER_SIZE);
+        strncpy(destroy_name, destroy, MAX_CHAR_BUFFER_SIZE);
+        strncpy(refresh_name, refresh, MAX_CHAR_BUFFER_SIZE);
 
         state = s;
         return 0;
 }
 
-static i32 handle_hot_reload() {
+static i32 handle_lib_function(const char* name) {
+        i32 err = 0;
+
         if (lib_handle)
                 dlclose(lib_handle);
 
         lib_handle = dlopen(file_path, RTLD_NOW);
 
-        if (!lib_handle)
+        if (!lib_handle) {
+                ERROR("No lib handle at: %p", lib_handle);
                 return -1;
+        }
+
 
         dlerror();
-        *(void **) (&reload_func) = dlsym(lib_handle, entry_point);
+        *(void **) (&func)  = dlsym(lib_handle, name);
 
-        if (reload_func)
-                state = reload_func(state);
+        if (func) {
+                state = func(state);
+        } else {
+                ERROR("No function loaded from: %p", func);
+                err = -1;
+        }
 
         dlclose(lib_handle);
         lib_handle = NULL;
-        return 0;
+
+        return err;
 }
+
 
 static char handle_stdin() {
         char input[256];
 
         memset(input, 0, sizeof(input));
+
         if (fgets(input, sizeof(input), stdin) == NULL) {
                 return 0;
         }
@@ -80,16 +110,19 @@ static char handle_stdin() {
         }
 
         if (input[0] == 'l') {
-                return 'q';
+                return 'l';
+        }
+
+        if (input[0] == 'r') {
+                return 'r';
         }
         return 0;
 }
 
-static i32 handle_file_changes() {
+static hot_reload_action handle_file_changes() {
         fd_set fds;
 
         i32 stdin_fd = fileno(stdin);
-
 
         FD_ZERO(&fds);
         FD_SET(stdin_fd, &fds);
@@ -104,70 +137,68 @@ static i32 handle_file_changes() {
                 char in = handle_stdin();
 
                 if (in == 'q')
-                        return QUIT_FROM_TERMINAL;
+                        return hot_reload_quit;
 
                 if (in == 'l')
-                        return 0;
+                        return hot_reload_reload;
+
+                if (in == 'r')
+                        return hot_reload_refresh;
         }
 
-        return 0;
+        return hot_reload_nothing;
 }
 
-static i32 handle_quit() {
-        if (lib_handle)
-                dlclose(lib_handle);
-
-        lib_handle = dlopen(file_path, RTLD_NOW);
-
-        if (!lib_handle)
-                return -1;
-
-        dlerror();
-        *(void **) (&quit_func) = dlsym(lib_handle, exit_point);
-
-        if (quit_func)
-                state = quit_func(state);
-
-        dlclose(lib_handle);
-        lib_handle = NULL;
-        return 0;
-}
-
-static i32 run_main_loop() {
+static hot_reload_action run_main_loop() {
         i32 err = 0;
 
-        err = handle_hot_reload();
-
         if (err != 0)
                 return err;
 
-        err = handle_file_changes();
+        hot_reload_action action = handle_file_changes();
 
-        if (err == QUIT_FROM_TERMINAL) {
-                err = handle_quit();
+        switch (action) {
+        case hot_reload_quit:
+                err = handle_lib_function(destroy_name);
 
-                if (err < 0)
-                        return -1;
-                else
-                        return QUIT_FROM_TERMINAL;
+                if (err == 0) {
+                        return hot_reload_quit;
+                } else {
+                        ERROR("Error handling destory_func: %d", err);
+                        return hot_reload_err;
+                }
+        case hot_reload_reload:
+                err = handle_lib_function(load_name);
+
+                if (err == 0) {
+                        return hot_reload_nothing;
+                } else {
+                        ERROR("Error handling load_func: %d", err);
+                        return hot_reload_err;
+                }
+        case hot_reload_refresh:
+                err = handle_lib_function(refresh_name);
+                if (err == 0) {
+                        return hot_reload_nothing;
+                } else {
+                        ERROR("Error handling refresh_func: %d", err);
+                        return hot_reload_err;
+                }
+        default:
+                return hot_reload_nothing;
         }
-
-        if (err != 0)
-                return err;
-
-        return 0;
 }
 
 i32 run_hot_reloader() {
         while (true) {
-                i32 err = run_main_loop();
+                hot_reload_action action = run_main_loop();
 
-                if (err == 0)
-                        continue;
-                else if (err == QUIT_FROM_TERMINAL)
+                if (action == hot_reload_quit)
                         break;
+                else if (action == hot_reload_err)
+                        return -1;
                 else
-                        return err;
+                        continue;
         }
 
         return 0;
