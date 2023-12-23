@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 #include "portaudio/include/portaudio.h"
-#include "src/hot_reload/hot_reload.h"
+#include "hot_reload/hot_reload.h"
 
 static const char* lib_path = "/home/edgallyot/dev/sami_c/build/sami/libsami.so";
 static const char* load = "sami_engine_reload";

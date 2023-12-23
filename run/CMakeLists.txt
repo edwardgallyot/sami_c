@@ -1,13 +1,12 @@
 add_executable(run
     src/main.c
-    src/hot_reload/hot_reload.c
 )
 
 target_link_libraries(run
 PRIVATE
     PortAudio
     portmidi
-    utils
+    hot_reload
 )
 target_include_directories(run
 PRIVATE

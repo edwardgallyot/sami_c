@@ -24,6 +24,7 @@ void* sami_engine_reload(void* engine) {
 
         eng->state->counter++;
         eng->state->counter2--;
+        printf("Digit: %d\n", eng->state->counter);
 
         return eng;
 }

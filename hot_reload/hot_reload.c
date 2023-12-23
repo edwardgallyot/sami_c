@@ -7,7 +7,7 @@
 #include <string.h>
 #include <sys/select.h>
 
-#include "src/hot_reload/hot_reload.h"
+#include "hot_reload.h"
 #include "utils/log.h"
 
 #define MAX_CHAR_BUFFER_SIZE (100)
