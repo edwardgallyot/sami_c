@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 #include "src/engine/engine.h"
-#include "src/sami.h"
 
 sami_engine* sami_engine_create_engine() {
         sami_engine* engine = (sami_engine*)malloc(sizeof(sami_engine));

@@ -12,17 +12,11 @@
 
 #define MAX_CHAR_BUFFER_SIZE (100)
 
-static char file_path[MAX_CHAR_BUFFER_SIZE];
-static char load_name[MAX_CHAR_BUFFER_SIZE];
-static char refresh_name[MAX_CHAR_BUFFER_SIZE];
-static char destroy_name[MAX_CHAR_BUFFER_SIZE];
-
 typedef enum {
         hot_reload_err = -1,
         hot_reload_nothing = 0,
         hot_reload_quit = 1,
         hot_reload_reload = 2,
-        hot_reload_refresh = 3,
 } hot_reload_action;
 
 static void* state;
@@ -33,46 +27,13 @@ typedef void* (shared_func)(void*);
 
 shared_func* func;
 
-i32 init_hot_reloader(
-        void* s,
-        const char* file,
-        const char* load,
-        const char* refresh,
-        const char* destroy
-) {
-        memset(file_path, 0, sizeof(file_path));
-        memset(load_name, 0, sizeof(load_name));
-        memset(destroy_name, 0, sizeof(destroy_name));
-        memset(refresh_name, 0, sizeof(refresh_name));
-
-        if (strnlen(file,  MAX_CHAR_BUFFER_SIZE) >= MAX_CHAR_BUFFER_SIZE)
-                return -1;
-
-        if (strnlen(load,  MAX_CHAR_BUFFER_SIZE) >= MAX_CHAR_BUFFER_SIZE)
-                return -1;
-
-        if (strnlen(destroy,  MAX_CHAR_BUFFER_SIZE) >= MAX_CHAR_BUFFER_SIZE)
-                return -1;
-
-        if (strnlen(refresh,  MAX_CHAR_BUFFER_SIZE) >= MAX_CHAR_BUFFER_SIZE)
-                return -1;
-
-        strncpy(file_path, file, MAX_CHAR_BUFFER_SIZE);
-        strncpy(load_name, load, MAX_CHAR_BUFFER_SIZE);
-        strncpy(destroy_name, destroy, MAX_CHAR_BUFFER_SIZE);
-        strncpy(refresh_name, refresh, MAX_CHAR_BUFFER_SIZE);
-
-        state = s;
-        return 0;
-}
-
-static i32 handle_lib_function(const char* name) {
+static i32 handle_lib_function(hot_reloader* hot_reloader, const char* name) {
         i32 err = 0;
 
         if (lib_handle)
                 dlclose(lib_handle);
 
-        lib_handle = dlopen(file_path, RTLD_NOW);
+        lib_handle = dlopen(hot_reloader->file, RTLD_NOW);
 
         if (!lib_handle) {
                 ERROR("No lib handle at: %p", lib_handle);
@@ -113,9 +74,6 @@ static char handle_stdin() {
                 return 'l';
         }
 
-        if (input[0] == 'r') {
-                return 'r';
-        }
         return 0;
 }
 
@@ -141,15 +99,12 @@ static hot_reload_action handle_file_changes() {
 
                 if (in == 'l')
                         return hot_reload_reload;
-
-                if (in == 'r')
-                        return hot_reload_refresh;
         }
 
         return hot_reload_nothing;
 }
 
-static hot_reload_action run_main_loop() {
+static hot_reload_action run_main_loop(hot_reloader* hot_reloader) {
         i32 err = 0;
 
         if (err != 0)
@@ -159,7 +114,7 @@ static hot_reload_action run_main_loop() {
 
         switch (action) {
         case hot_reload_quit:
-                err = handle_lib_function(destroy_name);
+                err = handle_lib_function(hot_reloader, hot_reloader->destroy);
 
                 if (err == 0) {
                         return hot_reload_quit;
@@ -168,7 +123,7 @@ static hot_reload_action run_main_loop() {
                         return hot_reload_err;
                 }
         case hot_reload_reload:
-                err = handle_lib_function(load_name);
+                err = handle_lib_function(hot_reloader, hot_reloader->load);
 
                 if (err == 0) {
                         return hot_reload_nothing;
@@ -176,22 +131,14 @@ static hot_reload_action run_main_loop() {
                         ERROR("Error handling load_func: %d", err);
                         return hot_reload_err;
                 }
-        case hot_reload_refresh:
-                err = handle_lib_function(refresh_name);
-                if (err == 0) {
-                        return hot_reload_nothing;
-                } else {
-                        ERROR("Error handling refresh_func: %d", err);
-                        return hot_reload_err;
-                }
         default:
                 return hot_reload_nothing;
         }
 }
 
-i32 run_hot_reloader() {
+i32 run_hot_reloader(hot_reloader* hot_reloader) {
         while (true) {
-                hot_reload_action action = run_main_loop();
+                hot_reload_action action = run_main_loop(hot_reloader);
 
                 if (action == hot_reload_quit)
                         break;

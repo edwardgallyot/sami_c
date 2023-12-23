@@ -4,12 +4,11 @@
 
 #include "utils/types.h"
 
-i32 init_hot_reloader(
-        void* s,
-        const char* file,
-        const char* load,
-        const char* refresh,
-        const char* destroy
-);
+typedef struct hot_reloader {
+        const char* file;
+        const char* load;
+        const char* destroy;
+        void* data;
+} hot_reloader;
 
-i32 run_hot_reloader();
+i32 run_hot_reloader(hot_reloader* reloader);

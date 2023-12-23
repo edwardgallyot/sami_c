@@ -9,9 +9,7 @@
 
 static const char* lib_path = "/home/edgallyot/dev/sami_c/build/sami/libsami.so";
 static const char* load = "sami_engine_reload";
-static const char* refresh = "sami_engine_refresh";
 static const char* destroy = "sami_engine_quit";
-
 
 int main(void) {
         Pa_Initialize();
@@ -22,12 +20,14 @@ int main(void) {
 
         free(working_dir);
 
-        void* e = NULL;
+        hot_reloader reloader = {
+                .file = lib_path,
+                .load = load,
+                .destroy = destroy,
+                .data = NULL
+        };
 
-        if (init_hot_reloader(e, lib_path, load, refresh, destroy) != 0)
-                return -1;
-
-        i32 err = run_hot_reloader();
+        i32 err = run_hot_reloader(&reloader);
 
         if (err != 0) {
                 printf("Error running hot reloader.");
