@@ -5,6 +5,7 @@
 #include "src/state/state.h"
 #include "utils/types.h"
 
+
 typedef struct sami_engine {
         sami_state* state;
 } sami_engine;

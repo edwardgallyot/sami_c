@@ -23,9 +23,9 @@ static void* state;
 
 static void* lib_handle;
 
-typedef void* (shared_func)(void*);
+typedef void* (*shared_func)(void*);
 
-shared_func* func;
+shared_func func;
 
 static i32 handle_lib_function(hot_reloader* hot_reloader, const char* name) {
         i32 err = 0;
@@ -123,7 +123,13 @@ static hot_reload_action run_main_loop(hot_reloader* hot_reloader) {
                         return hot_reload_err;
                 }
         case hot_reload_reload:
+                if (hot_reloader->on_reload)
+                        hot_reloader->on_reload();
+
                 err = handle_lib_function(hot_reloader, hot_reloader->load);
+
+                if (hot_reloader->on_reloaded)
+                        hot_reloader->on_reloaded();
 
                 if (err == 0) {
                         return hot_reload_nothing;

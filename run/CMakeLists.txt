@@ -10,8 +10,10 @@ PRIVATE
 )
 target_include_directories(run
 PRIVATE
-    ..
     ../lib
+    ../hot_reload
+    ../sami
+    ..
     .
 )
 
