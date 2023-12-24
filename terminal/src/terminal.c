@@ -1,19 +1,18 @@
+// Copyright 2023 edg
+
 #include "terminal/src/terminal.h"
+#include "terminal/src/ui/ui.h"
 
 #include <stdio.h>
-#include <lib/ncurses/include/curses.h>
 
-void say_hello() {
-        initscr();
-        printf("Hello world\n");
-}
-
-
-void* sami_terminal_reload(void* reload) {
+void* sami_terminal_reload(void* ui) {
+        if (ui != NULL) {
+                terminal_destroy_ui(ui);
+        }
         printf("Hello sami Terminal\n");
-        return reload;
+        return ui;
 }
 
-void* sami_terminal_quit(void* engine) {
-        return engine;
+void* sami_terminal_quit(void* ui) {
+        return ui;
 }

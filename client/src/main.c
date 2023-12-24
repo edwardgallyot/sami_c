@@ -7,11 +7,14 @@
 #include "hot_reload/hot_reload.h"
 #include "utils/log.h"
 
-#define num_files 2
+#define num_files 5
 
 const char* watch_list[num_files] = {
         "../terminal/src/terminal.c",
         "../terminal/src/terminal.h",
+        "../terminal/src/ui/ui.c",
+        "../terminal/src/ui/ui.h",
+        "../terminal/CMakeLists.txt",
 };
 
 static const char* lib_path = "./terminal/libterminal.so";
@@ -28,12 +31,6 @@ static void on_lib_reloaded() {
 }
 
 int main(void) {
-        char* working_dir = getcwd(NULL, 100);
-
-        printf("%s", working_dir);
-
-        free(working_dir);
-
         hot_reloader reloader = {
                 .file = lib_path,
 

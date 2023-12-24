@@ -16,6 +16,7 @@ endif()
 add_library(terminal
     ${LIB_TYPE}
     src/terminal.c
+    src/ui/ui.c
 )
 
 target_include_directories(terminal
