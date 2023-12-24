@@ -5,6 +5,9 @@
 
 #include "src/engine/engine.h"
 
+static void process_sami_audio(f32** buffer, u32 num_samples, u32 num_channels) {
+}
+
 sami_engine* sami_engine_create_engine() {
         sami_engine* engine = (sami_engine*)malloc(sizeof(sami_engine));
 
@@ -12,6 +15,7 @@ sami_engine* sami_engine_create_engine() {
                 return engine;
 
         engine->state = sami_create_state();
+        engine->on_audio_callback = process_sami_audio;
 
         return engine;
 }

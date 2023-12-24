@@ -5,9 +5,11 @@
 #include "src/state/state.h"
 #include "utils/types.h"
 
+typedef void (*process_function)(f32**, u32, u32);
 
 typedef struct sami_engine {
         sami_state* state;
+        process_function on_audio_callback;
 } sami_engine;
 
 typedef struct sami_engine sami_engine;

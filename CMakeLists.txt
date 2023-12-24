@@ -14,6 +14,12 @@ if(NOT CMAKE_BUILD_TYPE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 endif()
 
+set(SAMI_SOURCE
+    ../sami/src/sami.c
+    ../sami/src/engine/engine.c
+    ../sami/src/state/state.c
+)
+
 add_subdirectory(lib/portaudio)
 add_subdirectory(lib/portmidi)
 add_subdirectory(sami)

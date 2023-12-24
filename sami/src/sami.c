@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 i32 sami_init() {
-        printf("Init sami!\n");
+        printf("Hi sami!\n");
         return 0;
 }
 
@@ -24,7 +24,7 @@ void* sami_engine_reload(void* engine) {
 
         eng->state->counter++;
         eng->state->counter2--;
-        printf("This looks cool: %d\n", eng->state->counter2);
+        printf("This is cool: %d\n", eng->state->counter2);
 
         return eng;
 }
