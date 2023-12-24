@@ -9,6 +9,7 @@
 #include "utils/log.h"
 
 #define num_files 6
+
 const char* watch_list[num_files] = {
         "../sami/src/sami.c",
         "../sami/src/sami.h",

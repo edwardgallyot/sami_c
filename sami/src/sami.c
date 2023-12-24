@@ -3,11 +3,6 @@
 #include "src/sami.h"
 #include <stdio.h>
 
-i32 sami_init() {
-        printf("Hi sami!\n");
-        return 0;
-}
-
 sami_engine* sami_create_engine() {
         return sami_engine_create_engine();
 }
@@ -21,11 +16,6 @@ void* sami_engine_reload(void* engine) {
                 sami_destroy_engine(engine);
 
         sami_engine* eng = sami_create_engine();
-
-        eng->state->counter++;
-        eng->state->counter2--;
-        printf("This is cool: %d\n", eng->state->counter2);
-
         return eng;
 }
 

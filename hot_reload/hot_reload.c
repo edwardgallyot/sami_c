@@ -31,6 +31,15 @@ typedef void* (*shared_func)(void*);
 shared_func func;
 
 static i32 handle_lib_function(hot_reloader* hot_reloader, const char* name) {
+        if (name == NULL) {
+                ERROR("No name supplied to lib handle");
+                return -1;
+        }
+
+        if (hot_reloader == NULL) {
+                ERROR("No hot reloader supplied");
+        }
+
         i32 err = 0;
 
         if (lib_handle)
@@ -187,6 +196,11 @@ static hot_reload_action run_main_loop(hot_reloader* reloader) {
         default:
                 return hot_reload_nothing;
         }
+}
+
+
+i32 init_hot_reloader(hot_reloader* reloader) {
+        return handle_lib_function(reloader, reloader->load);
 }
 
 i32 run_hot_reloader(hot_reloader* reloader) {
