@@ -32,12 +32,13 @@ shared_func func;
 
 static i32 handle_lib_function(hot_reloader* hot_reloader, const char* name) {
         if (name == NULL) {
-                ERROR("No name supplied to lib handle");
+                ERROR("Lib name.");
                 return -1;
         }
 
         if (hot_reloader == NULL) {
                 ERROR("No hot reloader supplied");
+                return -1;
         }
 
         i32 err = 0;
@@ -100,13 +101,8 @@ static hot_reload_action check_for_changes_in_watch_list(hot_reloader* reloader)
                 watch_list_item* next = item->next;
 
                 if (stat(item->file_path, &stats) == -1) {
-                        ERROR("Error getting file stats\n", errno);
+                        ERROR("Error getting file stats", errno);
                         return hot_reload_nothing;
-                }
-
-                if (stats.st_size != item->last_stats.st_size) {
-                        printf("%s: changed size\n", item->file_path);
-                        has_stats_changed = true;
                 }
 
                 if ((i64)stats.st_mtime != (i64)item->last_stats.st_mtime) {
@@ -180,14 +176,19 @@ static hot_reload_action run_main_loop(hot_reloader* reloader) {
                 if (reloader->on_reload)
                         reloader->on_reload();
 
-                system(reloader->build);
+                if (system(reloader->build) != 0) {
+                        ERROR("Issue with build: %s", reloader->build);
+                        return hot_reload_nothing;
+                }
 
                 err = handle_lib_function(reloader, reloader->load);
 
                 if (reloader->on_reloaded)
                         reloader->on_reloaded();
 
+
                 if (err == 0) {
+                        // We've just reloaded so return nothing
                         return hot_reload_nothing;
                 } else {
                         ERROR("Error handling load_func: %d", err);

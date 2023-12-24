@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "src/engine/engine.h"
-#include "log.h"
+#include "utils/log.h"
 
 static void process_sami_audio(f32** buffer, u32 num_samples, u32 num_channels) {
 }
@@ -22,15 +22,19 @@ sami_engine* sami_engine_create_engine() {
 }
 
 i32 sami_engine_free_engine(sami_engine* engine) {
-        if (engine == NULL) 
+        if (engine == NULL) {
+                ERROR("Engine is NULL");
                 return -1;
+        }
 
         i32 err;
 
         err = sami_destroy_state(engine->state);
 
-        if (err != 0)
+        if (err != 0) {
+                ERROR("Error destroying state");
                 return err;
+        }
 
         free(engine);
 

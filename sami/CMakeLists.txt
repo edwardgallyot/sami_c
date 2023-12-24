@@ -12,12 +12,9 @@ endif()
 add_library(
 sami
     ${LIB_TYPE}
-    ${SAMI_SOURCE}
-)
-
-target_link_libraries(sami
-PRIVATE
-    utils
+    src/sami.c
+    src/engine/engine.c
+    src/state/state.c
 )
 
 target_include_directories(sami

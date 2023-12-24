@@ -4,3 +4,6 @@
 [submodule "lib/portmidi"]
 	path = lib/portmidi
 	url = https://github.com/PortMidi/portmidi.git
+[submodule "lib/ncurses"]
+	path = lib/ncurses
+	url = https://github.com/mirror/ncurses

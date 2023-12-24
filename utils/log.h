@@ -1,6 +1,17 @@
+// Copyright 2023 edg
+
 #pragma once
 
-void log_error(const char *file, int line, const char *func, const char *format, ...);
-// ERROR macro
-#define ERROR(format, ...) log_error(__FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
+#include <stdio.h>
 
+// ERROR macro
+#define ERROR(format, ...)                                      \
+        fprintf(stderr,                                         \
+                "[%s %s] ERROR at %s:%d in %s(): "format,       \
+                __DATE__,                                       \
+                __TIME__,                                       \
+                __FILE__,                                       \
+                __LINE__,                                       \
+                __func__,                                       \
+                ##__VA_ARGS__);                                 \
+        fprintf(stderr, "\n");
