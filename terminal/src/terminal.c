@@ -9,10 +9,12 @@ void* sami_terminal_reload(void* ui) {
         if (ui != NULL) {
                 terminal_destroy_ui(ui);
         }
-        printf("Hello sami Terminal\n");
+        ui = terminal_build_ui();
+        terminal_run_ui(ui);
         return ui;
 }
 
 void* sami_terminal_quit(void* ui) {
+        terminal_destroy_ui(ui);
         return ui;
 }

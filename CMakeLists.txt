@@ -16,6 +16,7 @@ endif()
 
 add_subdirectory(lib/portaudio)
 add_subdirectory(lib/portmidi)
+add_subdirectory(lib/tinycthread)
 add_subdirectory(sami)
 add_subdirectory(run)
 add_subdirectory(hot_reload)

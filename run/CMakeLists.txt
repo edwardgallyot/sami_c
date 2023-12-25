@@ -11,8 +11,6 @@ PRIVATE
 
 target_include_directories(run
 PRIVATE
-    ../lib
-    ../sami
     ..
     .
 )

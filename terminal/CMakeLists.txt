@@ -28,4 +28,5 @@ PRIVATE
 target_link_libraries(terminal
 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../lib/ncurses/lib/libncurses.a
+    tinycthread
 )

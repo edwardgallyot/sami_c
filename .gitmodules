@@ -7,3 +7,6 @@
 [submodule "lib/ncurses"]
 	path = lib/ncurses
 	url = https://github.com/mirror/ncurses
+[submodule "lib/tinycthread"]
+	path = lib/tinycthread
+	url = https://github.com/tinycthread/tinycthread.git

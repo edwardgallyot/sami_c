@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "portaudio/include/portaudio.h"
+#include "lib/portaudio/include/portaudio.h"
 #include "hot_reload/hot_reload.h"
 #include "utils/log.h"
 

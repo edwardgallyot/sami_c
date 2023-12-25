@@ -2,10 +2,17 @@
 #include <stdlib.h>
 
 #include "lib/ncurses/include/curses.h"
+#include "lib/tinycthread/source/tinycthread.h"
 
 #include "terminal/src/ui/ui.h"
 #include "utils/log.h"
 
+
+static i32 run_main_ui_loop(ui* ui) {
+        printw("Hi sami\n");
+        refresh();
+        return 0;
+}
 
 ui* terminal_build_ui() {
         ui* new_ui = malloc(sizeof(ui));
@@ -19,18 +26,19 @@ ui* terminal_build_ui() {
 
 i32 terminal_run_ui(ui* ui) {
         if (stdscr == NULL) {
-                initscr(); 
+                initscr();
         } else {
                 endwin();
                 initscr();
         }
 
+        run_main_ui_loop(ui);
 
         return 0;
 }
 
 i32 terminal_destroy_ui(ui* ui) {
-        if(stdscr != NULL) {
+        if (stdscr != NULL) {
                 endwin();
         }
 
