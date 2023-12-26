@@ -22,14 +22,6 @@ static const char* build = "cmake .. && cmake --build .";
 static const char* load = "sami_terminal_reload";
 static const char* destroy = "sami_terminal_quit";
 
-static void on_lib_reload() {
-        printf("Lock!\n");
-}
-
-static void on_lib_reloaded() {
-        printf("Unlock!\n");
-}
-
 int main(void) {
         hot_reloader reloader = {
                 .file = lib_path,
@@ -41,8 +33,8 @@ int main(void) {
 
                 .data = NULL,
 
-                .on_reload = on_lib_reload,
-                .on_reloaded = on_lib_reloaded,
+                .on_reload = NULL,
+                .on_reloaded = NULL,
 
                 .watch_list = NULL,
         };
