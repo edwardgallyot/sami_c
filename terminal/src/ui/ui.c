@@ -1,8 +1,8 @@
 // Copyright 2023 edg
 #include <stdlib.h>
+#include <threads.h>
 
 #include "lib/ncurses/include/curses.h"
-#include "lib/tinycthread/source/tinycthread.h"
 
 #include "terminal/src/ui/ui.h"
 #include "utils/log.h"
@@ -12,6 +12,10 @@ static i32 run_main_ui_loop(ui* ui) {
         printw("Hi sami\n");
         refresh();
         return 0;
+}
+
+static i32 test_thread(void* ) {
+        printf("Hello thread\n");
 }
 
 ui* terminal_build_ui() {
@@ -31,6 +35,15 @@ i32 terminal_run_ui(ui* ui) {
                 endwin();
                 initscr();
         }
+
+        thrd_t thread;
+
+        if (thrd_create(&thread, test_thread, NULL) != thrd_success) {
+                ERROR("Error creating thread");
+                return -1;
+        }
+
+        thrd_join(thread, NULL);
 
         run_main_ui_loop(ui);
 

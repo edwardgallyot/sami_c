@@ -14,4 +14,4 @@
                 __LINE__,                                       \
                 __func__,                                       \
                 ##__VA_ARGS__);                                 \
-        fprintf(stderr, "\n");
+        fprintf(stderr, "\n")
