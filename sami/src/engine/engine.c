@@ -9,8 +9,8 @@
 static void process_sami_audio(f32** buffer, u32 num_samples, u32 num_channels) {
 }
 
-sami_engine* sami_engine_create_engine() {
-        sami_engine* engine = (sami_engine*)malloc(sizeof(sami_engine));
+struct sami_engine* sami_engine_create_engine() {
+        struct sami_engine* engine = malloc(sizeof(struct sami_engine));
 
         if (engine == NULL)
                 return engine;
@@ -21,7 +21,7 @@ sami_engine* sami_engine_create_engine() {
         return engine;
 }
 
-i32 sami_engine_free_engine(sami_engine* engine) {
+i32 sami_engine_free_engine(struct sami_engine* engine) {
         if (engine == NULL) {
                 ERROR("Engine is NULL");
                 return -1;

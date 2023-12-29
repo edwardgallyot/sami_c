@@ -4,8 +4,8 @@
 
 #include "src/state/state.h"
 
-sami_state* sami_create_state() {
-        sami_state* state = (sami_state*)malloc(sizeof(sami_state));
+struct sami_state* sami_create_state() {
+        struct sami_state* state = malloc(sizeof(struct sami_state));
 
         if (state == NULL)
                 return state;
@@ -15,8 +15,8 @@ sami_state* sami_create_state() {
         return state;
 }
 
-i32 sami_destroy_state(sami_state* state) {
-        if (state == NULL) 
+i32 sami_destroy_state(struct sami_state* state) {
+        if (state == NULL)
                 return -1;
 
         free(state);

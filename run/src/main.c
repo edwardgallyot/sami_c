@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 #include "lib/portaudio/include/portaudio.h"
-#include "hot_reload/hot_reload.h"
+#include "hot_reload/src/hot_reload.h"
 #include "utils/log.h"
 
 #define num_files 6
@@ -41,7 +41,7 @@ int main(void) {
 
         free(working_dir);
 
-        hot_reloader reloader = {
+        struct hot_reloader reloader = {
                 .file = lib_path,
 
                 .load = load,

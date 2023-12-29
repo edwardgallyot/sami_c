@@ -13,7 +13,7 @@ typedef struct watch_list_item {
         struct stat last_stats;
 } watch_list_item;
 
-typedef struct hot_reloader {
+struct hot_reloader {
         const char* file;
 
         // load and destroy functions
@@ -31,12 +31,12 @@ typedef struct hot_reloader {
 
         // list of file descriptors
         watch_list_item* watch_list;
-} hot_reloader;
+};
 
-i32 init_hot_reloader(hot_reloader* reloader);
+i32 init_hot_reloader(struct hot_reloader* reloader);
 
-i32 run_hot_reloader(hot_reloader* reloader);
+i32 run_hot_reloader(struct hot_reloader* reloader);
 
-i32 add_file_to_watch_list(hot_reloader* reloader, const char* file_path);
+i32 add_file_to_watch_list(struct hot_reloader* reloader, const char* file_path);
 
-i32 clean_hot_reloader(hot_reloader* reloader);
+i32 clean_hot_reloader(struct hot_reloader* reloader);

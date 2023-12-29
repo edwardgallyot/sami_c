@@ -12,25 +12,25 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "../hot_reload/hot_reload.h"
+#include "hot_reload/src/hot_reload.h"
 #include "utils/log.h"
 
-typedef enum {
+enum hot_reload_action {
         hot_reload_err = -1,
         hot_reload_nothing = 0,
         hot_reload_quit = 1,
         hot_reload_reload = 2,
-} hot_reload_action;
+};
 
 static void* state;
 
-static void* lib_handle;
+static void* lib_handle = NULL;
 
 typedef void* (*shared_func)(void*);
 
 shared_func func;
 
-static i32 handle_lib_function(hot_reloader* hot_reloader, const char* name) {
+static i32 handle_lib_function(struct hot_reloader* hot_reloader, const char* name) {
         if (name == NULL) {
                 ERROR("Lib name.");
                 return -1;
@@ -43,29 +43,26 @@ static i32 handle_lib_function(hot_reloader* hot_reloader, const char* name) {
 
         i32 err = 0;
 
-        if (lib_handle)
-                dlclose(lib_handle);
 
-        lib_handle = dlopen(hot_reloader->file, RTLD_NOW);
+        if (lib_handle == NULL) {
+                lib_handle = dlopen(hot_reloader->file, RTLD_NOW);
+        }
 
         if (!lib_handle) {
                 ERROR("No lib handle at: %p", lib_handle);
                 return -1;
         }
 
-
         dlerror();
+
         *(void **) (&func)  = dlsym(lib_handle, name);
 
         if (func) {
-                state = func(state);
+                hot_reloader->data = func(hot_reloader->data);
         } else {
-                ERROR("No function loaded from: %p", func);
+                ERROR("No function loaded");
                 err = -1;
         }
-
-        dlclose(lib_handle);
-        lib_handle = NULL;
 
         return err;
 }
@@ -90,7 +87,7 @@ static char handle_stdin() {
         return 0;
 }
 
-static hot_reload_action check_for_changes_in_watch_list(hot_reloader* reloader) {
+static enum hot_reload_action check_for_changes_in_watch_list(struct hot_reloader* reloader) {
         watch_list_item* item = reloader->watch_list;
 
 
@@ -101,7 +98,7 @@ static hot_reload_action check_for_changes_in_watch_list(hot_reloader* reloader)
                 watch_list_item* next = item->next;
 
                 if (stat(item->file_path, &stats) == -1) {
-                        ERROR("Error getting file stats", errno);
+                        ERROR("Error getting file stats: %d", errno);
                         return hot_reload_nothing;
                 }
 
@@ -121,7 +118,7 @@ static hot_reload_action check_for_changes_in_watch_list(hot_reloader* reloader)
                 return hot_reload_nothing;
 }
 
-static hot_reload_action handle_file_changes(hot_reloader* reloader) {
+static enum hot_reload_action handle_file_changes(struct hot_reloader* reloader) {
         fd_set fds;
 
         struct timeval timeout;
@@ -135,14 +132,15 @@ static hot_reload_action handle_file_changes(hot_reloader* reloader) {
         FD_ZERO(&fds);
         FD_SET(stdin_fd, &fds);
 
-        i32 err;
+        i32 err = 0;
         err = select(1, &fds, NULL, NULL, &timeout);
 
         if (err < 0)
                 return err;
 
         if (FD_ISSET(stdin_fd, &fds)) {
-                char in = handle_stdin();
+                char in = 0;
+                in = handle_stdin();
 
                 if (in == 'q')
                         return hot_reload_quit;
@@ -154,13 +152,14 @@ static hot_reload_action handle_file_changes(hot_reloader* reloader) {
         return check_for_changes_in_watch_list(reloader);
 }
 
-static hot_reload_action run_main_loop(hot_reloader* reloader) {
+static enum hot_reload_action run_main_loop(struct hot_reloader* reloader) {
         i32 err = 0;
 
         if (err != 0)
                 return err;
 
-        hot_reload_action action = handle_file_changes(reloader);
+
+        enum hot_reload_action action = handle_file_changes(reloader);
 
         switch (action) {
         case hot_reload_quit:
@@ -181,6 +180,12 @@ static hot_reload_action run_main_loop(hot_reloader* reloader) {
                         return hot_reload_nothing;
                 }
 
+                err = handle_lib_function(reloader, reloader->destroy);
+                dlclose(lib_handle);
+                lib_handle = NULL;
+                reloader->data = NULL;
+                dlerror();
+
                 err = handle_lib_function(reloader, reloader->load);
 
                 if (reloader->on_reloaded)
@@ -200,13 +205,13 @@ static hot_reload_action run_main_loop(hot_reloader* reloader) {
 }
 
 
-i32 init_hot_reloader(hot_reloader* reloader) {
+i32 init_hot_reloader(struct hot_reloader* reloader) {
         return handle_lib_function(reloader, reloader->load);
 }
 
-i32 run_hot_reloader(hot_reloader* reloader) {
+i32 run_hot_reloader(struct hot_reloader* reloader) {
         while (true) {
-                hot_reload_action action = run_main_loop(reloader);
+                enum hot_reload_action action = run_main_loop(reloader);
 
                 if (action == hot_reload_quit)
                         break;
@@ -215,18 +220,17 @@ i32 run_hot_reloader(hot_reloader* reloader) {
                 else
                         continue;
         }
-
         return 0;
 }
 
-i32 add_file_to_watch_list(hot_reloader* reloader, const char* file_path) {
+i32 add_file_to_watch_list(struct hot_reloader* reloader, const char* file_path) {
         i32 fd = open(file_path, (O_RDWR));
         if (fd == -1) {
                 ERROR("Error opening file_path: %s: %d", file_path, fd);
                 return fd;
         }
 
-        i32 err = close(fd); 
+        i32 err = close(fd);
         if (err == -1) {
                 ERROR("Error closing up fd: %d.", errno);
                 return fd;
@@ -272,9 +276,13 @@ i32 add_file_to_watch_list(hot_reloader* reloader, const char* file_path) {
         return 0;
 }
 
-i32 clean_hot_reloader(hot_reloader* reloader) {
+i32 clean_hot_reloader(struct hot_reloader* reloader) {
         if (reloader == NULL) {
                 return -1;
+        }
+
+        if (lib_handle) {
+                dlclose(lib_handle);
         }
 
         watch_list_item* item = reloader->watch_list;

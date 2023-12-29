@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "hot_reload/hot_reload.h"
+#include "hot_reload/src/hot_reload.h"
 #include "utils/log.h"
 
 #define num_files 5
@@ -23,7 +23,7 @@ static const char* load = "sami_terminal_reload";
 static const char* destroy = "sami_terminal_quit";
 
 int main(void) {
-        hot_reloader reloader = {
+        struct hot_reloader reloader = {
                 .file = lib_path,
 
                 .load = load,
@@ -44,11 +44,21 @@ int main(void) {
                         return -1;
         }
 
-        i32 err = run_hot_reloader(&reloader);
+        i32 err;
 
+        err = init_hot_reloader(&reloader);
 
-        if (err != 0)
+        if (err != 0) {
+                ERROR("Error initialising hot reloader.\n");
+                return err;
+        }
+
+        err = run_hot_reloader(&reloader);
+
+        if (err != 0) {
                 ERROR("Error running hot reloader.\n");
+                return err;
+        }
 
         clean_hot_reloader(&reloader);
 

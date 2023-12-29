@@ -13,6 +13,8 @@ else()
     set(LIB_TYPE STATIC)
 endif()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 add_library(terminal
     ${LIB_TYPE}
     src/terminal.c
@@ -28,4 +30,6 @@ PRIVATE
 target_link_libraries(terminal
 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../lib/ncurses/lib/libncurses.a
+    thread
+    atomic
 )

@@ -12,7 +12,7 @@
  * @returns a pointer to a sami engine.
  * NULL if not allocated.
  **/
-sami_engine* sami_create_engine();
+struct sami_engine* sami_create_engine();
 
 /** @brief destroys the sami_engine
  *
@@ -27,7 +27,7 @@ sami_engine* sami_create_engine();
  * @returns i32 -1 if unsuccessful and 
  * returns 0 if successful.
  **/
-i32 sami_destroy_engine(sami_engine* engine);
+i32 sami_destroy_engine(struct sami_engine* engine);
 
 
 /*

@@ -3,6 +3,7 @@ SAMI_HOT_RELOAD
     "Enable hot reloading for the SAMI library"
     OFF
 )
+
 if(SAMI_HOT_RELOAD)
     set(LIB_TYPE SHARED)
 else()
