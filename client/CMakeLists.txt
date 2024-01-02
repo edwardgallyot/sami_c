@@ -9,10 +9,7 @@ PRIVATE
 
 target_include_directories(client
 PRIVATE
-    ../lib
-    ../sami
     ..
-    .
 )
 
 add_custom_target(sami_client

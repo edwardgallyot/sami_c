@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 // ERROR macro
-#define ERROR(format, ...)                                      \
+#define ERROR(format, ...)                                     {\
         fprintf(stderr,                                         \
                 "[%s %s] ERROR at %s:%d in %s(): "format,       \
                 __DATE__,                                       \
@@ -14,4 +14,4 @@
                 __LINE__,                                       \
                 __func__,                                       \
                 ##__VA_ARGS__);                                 \
-        fprintf(stderr, "\n")
+        fprintf(stderr, "\n");                                  }

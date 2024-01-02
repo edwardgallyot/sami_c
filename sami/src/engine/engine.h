@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "src/state/state.h"
+#include "sami/src/state/state.h"
 #include "utils/types.h"
 
 typedef void (*process_function)(f32**, u32, u32);

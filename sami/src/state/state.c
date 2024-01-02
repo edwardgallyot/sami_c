@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-#include "src/state/state.h"
+#include "sami/src/state/state.h"
 
 struct sami_state* sami_create_state() {
         struct sami_state* state = malloc(sizeof(struct sami_state));

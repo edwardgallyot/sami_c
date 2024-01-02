@@ -7,13 +7,19 @@
 #include "hot_reload/src/hot_reload.h"
 #include "utils/log.h"
 
-#define num_files 5
+#define num_files 11
 
 const char* watch_list[num_files] = {
         "../terminal/src/terminal.c",
         "../terminal/src/terminal.h",
         "../terminal/src/ui/ui.c",
         "../terminal/src/ui/ui.h",
+        "../terminal/src/ui/state/state.c",
+        "../terminal/src/ui/state/state.h",
+        "../terminal/src/ui/draw/draw.c",
+        "../terminal/src/ui/draw/draw.h",
+        "../terminal/src/ui/colour/colour.c",
+        "../terminal/src/ui/colour/colour.h",
         "../terminal/CMakeLists.txt",
 };
 

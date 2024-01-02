@@ -9,6 +9,7 @@ project(sami_dev VERSION 1.0.0)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED True)
 
+
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries")
 
 set(SAMI_HOT_RELOAD ON CACHE BOOL "Enable sami hot reloading")

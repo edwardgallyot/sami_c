@@ -1,6 +1,6 @@
 // Copyright 2023 edg
 
-#include "src/sami.h"
+#include "sami/src/sami.h"
 #include <stdio.h>
 
 struct sami_engine* sami_create_engine() {

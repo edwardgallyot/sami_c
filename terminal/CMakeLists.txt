@@ -19,12 +19,14 @@ add_library(terminal
     ${LIB_TYPE}
     src/terminal.c
     src/ui/ui.c
+    src/ui/draw/draw.c
+    src/ui/colour/colour.c
+    src/ui/state/state.c
 )
 
 target_include_directories(terminal
 PRIVATE
     ..
-    ../lib/ncurses/include/
 )
 
 target_link_libraries(terminal

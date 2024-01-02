@@ -12,7 +12,6 @@ PRIVATE
 target_include_directories(run
 PRIVATE
     ..
-    .
 )
 
 add_custom_target(sami_run

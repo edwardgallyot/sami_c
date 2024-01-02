@@ -22,8 +22,6 @@ enum hot_reload_action {
         hot_reload_reload = 2,
 };
 
-static void* state;
-
 static void* lib_handle = NULL;
 
 typedef void* (*shared_func)(void*);
@@ -45,7 +43,7 @@ static i32 handle_lib_function(struct hot_reloader* hot_reloader, const char* na
 
 
         if (lib_handle == NULL) {
-                lib_handle = dlopen(hot_reloader->file, RTLD_NOW);
+                lib_handle = dlopen(hot_reloader->file, (RTLD_LAZY | RTLD_LOCAL));
         }
 
         if (!lib_handle) {
@@ -53,14 +51,12 @@ static i32 handle_lib_function(struct hot_reloader* hot_reloader, const char* na
                 return -1;
         }
 
-        dlerror();
-
         *(void **) (&func)  = dlsym(lib_handle, name);
 
         if (func) {
                 hot_reloader->data = func(hot_reloader->data);
         } else {
-                ERROR("No function loaded");
+                ERROR("No function loaded: %s", dlerror());
                 err = -1;
         }
 
@@ -119,36 +115,7 @@ static enum hot_reload_action check_for_changes_in_watch_list(struct hot_reloade
 }
 
 static enum hot_reload_action handle_file_changes(struct hot_reloader* reloader) {
-        fd_set fds;
-
-        struct timeval timeout;
-
-        i32 stdin_fd = fileno(stdin);
-
-        // Set the timeout to 10 seconds
-        timeout.tv_sec = 0;
-        timeout.tv_usec = 10000;
-
-        FD_ZERO(&fds);
-        FD_SET(stdin_fd, &fds);
-
-        i32 err = 0;
-        err = select(1, &fds, NULL, NULL, &timeout);
-
-        if (err < 0)
-                return err;
-
-        if (FD_ISSET(stdin_fd, &fds)) {
-                char in = 0;
-                in = handle_stdin();
-
-                if (in == 'q')
-                        return hot_reload_quit;
-
-                if (in == 'l')
-                        return hot_reload_reload;
-        }
-
+        sleep(1);
         return check_for_changes_in_watch_list(reloader);
 }
 
@@ -181,10 +148,19 @@ static enum hot_reload_action run_main_loop(struct hot_reloader* reloader) {
                 }
 
                 err = handle_lib_function(reloader, reloader->destroy);
-                dlclose(lib_handle);
-                lib_handle = NULL;
-                reloader->data = NULL;
-                dlerror();
+
+                if (err != 0) {
+                        ERROR("Error handling lib function: %d", err);
+                        return hot_reload_nothing;
+                }
+
+
+                if (dlclose(lib_handle) == 0) {
+                        lib_handle = NULL;
+                        reloader->data = NULL;
+                } else {
+                        ERROR("Couldn't close dl: %d: %s", err, dlerror());
+                }
 
                 err = handle_lib_function(reloader, reloader->load);
 

@@ -4,7 +4,7 @@
 
 #include <stdbool.h>
 
-#include "src/engine/engine.h"
+#include "sami/src/engine/engine.h"
 #include "utils/types.h"
 
 /** @brief creates a sami_engine

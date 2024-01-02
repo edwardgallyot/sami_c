@@ -7,30 +7,53 @@
 #include "lib/ncurses/include/curses.h"
 
 #include "terminal/src/ui/ui.h"
+#include "terminal/src/ui/draw/draw.h"
 #include "thread/src/thread.h"
 #include "utils/log.h"
+#include "utils/time.h"
 
 static const char* thread_name = "Ui thread";
 
+static const i32 sleep_time_ui = 50000000;
+
+static void terminal_cancel_ui_thread(struct ui* ui) {
+        if (atomic_load_bool(&ui->run)) {
+                atomic_store_bool(&ui->run, false);
+                while (!atomic_load_bool(&ui->run)) {}
+        }
+}
+
+static bool terminal_ui_cancelled(struct ui* ui) {
+        if (!atomic_load_bool(&ui->run)) {
+                atomic_store_bool(&ui->run, true);
+                return true;
+        }
+        return false;
+}
+
+static char handle_std_in_no_block(void) {
+        nodelay(stdscr, TRUE);
+        int ch = getch();
+
+        if (ch != ERR)
+                return (char)(ch);
+
+        return '\0';
+}
+
 static void* ui_thread(void* p) {
         struct ui* ui = (struct ui*)p;
-        bool hello = true;
-        while(true) {
-                if (hello) {
-                        clear();
-                        printw("Hello this is better\n");
-                        printw("At least I think...\n");
-                        printw("Cool beans\n");
-                        hello = false;
+
+        while (true) {
+                sleep_ns(sleep_time_ui);
+                terminal_ui_draw(ui);
+                char c = handle_std_in_no_block();
+                if (c != '\0') {
+                        addch(c);
                 }
-                refresh();
 
-                
-
-                if (!atomic_load_bool(&ui->run)) {
-                        atomic_store_bool(&ui->run, true);
+                if (terminal_ui_cancelled(ui))
                         break;
-                }
         }
 
         return NULL;
@@ -42,7 +65,7 @@ static i32 run_main_ui_loop(struct ui* ui) {
         return 0;
 }
 
-struct ui* terminal_build_ui() {
+struct ui* terminal_build_ui(void) {
         printf("Building\n");
 
         struct ui* new_ui = malloc(sizeof(struct ui));
@@ -52,19 +75,26 @@ struct ui* terminal_build_ui() {
                 return NULL;
         }
 
-        new_ui->counter = 0;
         new_ui->run = false;
         new_ui->ui_thread = NULL;
+        new_ui->ui_state = create_state();
 
         return new_ui;
 }
 
+static void terminal_setup_ui(void) {
+        initscr();
+        raw();
+        cbreak();
+        noecho();
+}
+
 i32 terminal_run_ui(struct ui* ui) {
         if (stdscr == NULL) {
-                initscr();
+                terminal_setup_ui();
         } else {
                 endwin();
-                initscr();
+                terminal_setup_ui();
         }
 
         run_main_ui_loop(ui);
@@ -78,16 +108,14 @@ i32 terminal_destroy_ui(struct ui* ui) {
                 return -1;
         }
 
-        if (atomic_load_bool(&ui->run)) {
-                atomic_store_bool(&ui->run, false);
-                while (!atomic_load_bool(&ui->run)) {}
-        }
+        terminal_cancel_ui_thread(ui);
 
         if (stdscr != NULL) {
                 endwin();
         }
 
         join_thread(ui->ui_thread);
+        destroy_state(ui->ui_state);
 
         free(ui);
         ui = NULL;

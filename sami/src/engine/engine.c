@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "src/engine/engine.h"
+#include "sami/src/engine/engine.h"
 #include "utils/log.h"
 
 static void process_sami_audio(f32** buffer, u32 num_samples, u32 num_channels) {
