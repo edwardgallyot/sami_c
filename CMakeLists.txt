@@ -10,6 +10,36 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED True)
 
 
+# Directory where the ncurses static library should be
+set(NCURSES_LIB_DIR "${CMAKE_BINARY_DIR}/../lib/ncurses")
+set(NCURSES_STATIC_LIB "${NCURSES_LIB_DIR}/lib/libncurses.a")
+
+# Try to find the ncurses static library
+find_library(NCURSES_FOUND NAMES ncurses libncurses.a PATHS ${NCURSES_LIB_DIR} NO_DEFAULT_PATH)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+if(NOT NCURSES_FOUND)
+    # Define the steps to build ncurses
+
+    # Custom command to build ncurses
+    add_custom_command(
+        OUTPUT ${NCURSES_STATIC_LIB}
+        COMMAND cd ${NCURSES_LIB_DIR} && ./configure --with-static --with-pic --without-normal --without-debug CFLAGS=-fPIC
+        COMMAND make -C ${NCURSES_LIB_DIR}
+        COMMENT "Building ncurses"
+    )
+
+    # Custom target that depends on the custom command
+    add_custom_target(ncurses ALL DEPENDS ${NCURSES_STATIC_LIB})
+
+    # Define the static library target
+    add_library(libncurses STATIC IMPORTED)
+    set_property(TARGET libncurses PROPERTY IMPORTED_LOCATION ${NCURSES_STATIC_LIB})
+    add_dependencies(libncurses ncurses)
+else()
+    add_library(libncurses STATIC IMPORTED)
+    set_property(TARGET libncurses PROPERTY IMPORTED_LOCATION ${NCURSES_FOUND})
+endif()
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries")
 
 set(SAMI_HOT_RELOAD ON CACHE BOOL "Enable sami hot reloading")
@@ -20,6 +50,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 endif()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 
 add_subdirectory(lib/portaudio)
 add_subdirectory(lib/portmidi)

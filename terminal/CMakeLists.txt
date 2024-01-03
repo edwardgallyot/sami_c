@@ -27,6 +27,7 @@ add_library(terminal
 target_include_directories(terminal
 PRIVATE
     ..
+    ../lib/ncurses/include
 )
 
 target_link_libraries(terminal
