@@ -8,8 +8,8 @@
 #include "atomic/src/atomic.h"
 
 struct ui {
-        struct state* ui_state;
-        struct thread* ui_thread;
+        struct state* state;
+        struct thread* thread;
         atomic_bool run;
 };
 

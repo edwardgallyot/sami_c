@@ -24,11 +24,11 @@ static const char* build = "cmake .. && cmake --build .";
 static const char* load = "sami_engine_reload";
 static const char* destroy = "sami_engine_quit";
 
-static void on_lib_reload() {
+static void on_lib_reload(void) {
         printf("Lock!\n");
 }
 
-static void on_lib_reloaded() {
+static void on_lib_reloaded(void) {
         printf("Unlock!\n");
 }
 

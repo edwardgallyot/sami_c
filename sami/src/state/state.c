@@ -22,3 +22,4 @@ i32 sami_destroy_state(struct sami_state* state) {
         free(state);
         return 0;
 }
+

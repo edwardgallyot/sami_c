@@ -4,6 +4,7 @@
 #include <dlfcn.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +27,13 @@ static void* lib_handle = NULL;
 
 typedef void* (*shared_func)(void*);
 
-shared_func func;
+static shared_func func;
+
+static bool should_quit = false;
+
+static void sigint_handle(int sig) {
+        should_quit = true;
+}
 
 static i32 handle_lib_function(struct hot_reloader* hot_reloader, const char* name) {
         if (name == NULL) {
@@ -182,11 +189,15 @@ static enum hot_reload_action run_main_loop(struct hot_reloader* reloader) {
 
 
 i32 init_hot_reloader(struct hot_reloader* reloader) {
+        signal(SIGINT, sigint_handle);
         return handle_lib_function(reloader, reloader->load);
 }
 
 i32 run_hot_reloader(struct hot_reloader* reloader) {
         while (true) {
+                if (should_quit)
+                        break;
+
                 enum hot_reload_action action = run_main_loop(reloader);
 
                 if (action == hot_reload_quit)

@@ -7,7 +7,9 @@
 #include "lib/ncurses/include/curses.h"
 
 #include "terminal/src/ui/ui.h"
+#include "terminal/src/ui/colour/colour.h"
 #include "terminal/src/ui/draw/draw.h"
+#include "terminal/src/ui/state/state.h"
 #include "thread/src/thread.h"
 #include "utils/log.h"
 #include "utils/time.h"
@@ -44,16 +46,37 @@ static char handle_std_in_no_block(void) {
 static void* ui_thread(void* p) {
         struct ui* ui = (struct ui*)p;
 
+        i32 err = init_colours();
+        if (err != 0) {
+                ERROR("Error initialising colours: %d", err);
+        }
+
         while (true) {
                 sleep_ns(sleep_time_ui);
-                terminal_ui_draw(ui);
+
                 char c = handle_std_in_no_block();
-                if (c != '\0') {
-                        addch(c);
+
+                err = state_process_input(ui->state, c);
+
+                if (err != 0) {
+                        ERROR("Error updating state: %d", err);
                 }
+
+                err = terminal_ui_draw(ui);
+
+                if (err != 0) {
+                        ERROR("Error drawing ui: %d", err);
+                }
+                
 
                 if (terminal_ui_cancelled(ui))
                         break;
+
+                if (ui->state->should_quit) {
+                        endwin();
+                        atomic_store_bool(&ui->run, false);
+                        break;
+                }
         }
 
         return NULL;
@@ -61,7 +84,7 @@ static void* ui_thread(void* p) {
 
 static i32 run_main_ui_loop(struct ui* ui) {
         atomic_store_bool(&ui->run, true);
-        ui->ui_thread = create_thread(thread_name, ui_thread, ui);
+        ui->thread = create_thread(thread_name, ui_thread, ui);
         return 0;
 }
 
@@ -76,8 +99,8 @@ struct ui* terminal_build_ui(void) {
         }
 
         new_ui->run = false;
-        new_ui->ui_thread = NULL;
-        new_ui->ui_state = create_state();
+        new_ui->thread = NULL;
+        new_ui->state = create_state();
 
         return new_ui;
 }
@@ -114,8 +137,8 @@ i32 terminal_destroy_ui(struct ui* ui) {
                 endwin();
         }
 
-        join_thread(ui->ui_thread);
-        destroy_state(ui->ui_state);
+        join_thread(ui->thread);
+        destroy_state(ui->state);
 
         free(ui);
         ui = NULL;

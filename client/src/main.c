@@ -68,6 +68,8 @@ int main(void) {
 
         clean_hot_reloader(&reloader);
 
+        printf("Exiting client...\n");
+
 
         return 0;
 }
