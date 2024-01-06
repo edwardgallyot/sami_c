@@ -4,6 +4,10 @@
 
 #include "utils/types.h"
 
+enum state_mode {
+        state_mode_browse,
+};
+
 struct state {
         // Init flag
         bool needs_clearing;
@@ -12,7 +16,14 @@ struct state {
         bool should_quit;
 
         // Test state
-        int counter;
+        i32 counter;
+
+        // The current row and column of the state
+        i32 row;
+        i32 column;
+
+        // Current mode of the state
+        enum state_mode mode;
 };
 
 struct state* create_state(void);
