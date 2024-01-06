@@ -6,6 +6,11 @@
 
 enum state_mode {
         state_mode_browse,
+        state_mode_input,
+};
+
+enum state_window {
+        state_window_files,
 };
 
 struct state {

@@ -17,6 +17,12 @@ struct state* create_state(void) {
         state->needs_clearing = true;
         state->should_quit = false;
 
+        state->cursor_position_y = 0;
+        state->cursor_position_x = 0;
+
+        state->total_columns = -1;
+        state->total_rows = -1;
+
         return state;
 }
 
@@ -30,23 +36,31 @@ i32 destroy_state(struct state* state) {
 }
 
 static i32 handle_browse_mode_up(struct state* state) {
-        state->counter++;
+        if (state->cursor_position_y > 0) {
+                state->cursor_position_y -= 1;
+        }
         return 0;
 }
 
 
 static i32 handle_browse_mode_left(struct state* state) {
-        state->counter *= 2;
+        if (state->cursor_position_x > 0) {
+                state->cursor_position_x -= 1;
+        }
         return 0;
 }
 
 static i32 handle_browse_mode_right(struct state* state) {
-        state->counter /= 2;
+        if (state->cursor_position_x < (state->total_columns - 1)) {
+                state->cursor_position_x += 1;
+        }
         return 0;
 }
 
 static i32 handle_browse_mode_down(struct state* state) {
-        state->counter--;
+        if (state->cursor_position_y < (state->total_rows - 1)) {
+                state->cursor_position_y += 1;
+        }
         return 0;
 }
 
@@ -59,23 +73,29 @@ static i32 handle_browse_mode_quit(struct state* state) {
 
 static i32 handle_browse_mode(struct state* state, char c) {
         i32 result = 0;
-        if (c == 'k')
+        if (c == 'k') {
                 result = handle_browse_mode_up(state);
+        }
 
-        else if (c == 'j')
+        else if (c == 'j') {
                 result = handle_browse_mode_down(state);
+        }
 
-        else if (c == 'l')
+        else if (c == 'l') {
                 result = handle_browse_mode_right(state);
+        }
 
-        else if (c == 'h')
+        else if (c == 'h') {
                 result = handle_browse_mode_left(state);
+        }
 
-        else if (c == 'q')
+        else if (c == 'q') {
                 result = handle_browse_mode_quit(state);
+        }
 
-        else if (result != 0) 
+        else if (result != 0)  {
                 ERROR("Can't handle browse mode action: %c, result: %d", c, result);
+        }
 
         return result;
 }

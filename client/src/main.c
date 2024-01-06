@@ -2,14 +2,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "hot_reload/src/hot_reload.h"
 #include "utils/log.h"
+#include "utils/types.h"
 
-#define num_files 11
-
-const char* watch_list[num_files] = {
+const char* watch_list[] = {
         "../terminal/src/terminal.c",
         "../terminal/src/terminal.h",
         "../terminal/src/ui/ui.c",
@@ -20,8 +18,14 @@ const char* watch_list[num_files] = {
         "../terminal/src/ui/draw/draw.h",
         "../terminal/src/ui/colour/colour.c",
         "../terminal/src/ui/colour/colour.h",
+        "../terminal/src/ui/attribute/attribute.h",
+        "../terminal/src/ui/attribute/attribute.c",
+        "../terminal/src/ui/window/window.h",
+        "../terminal/src/ui/window/window.c",
         "../terminal/CMakeLists.txt",
 };
+
+const i32 num_files = sizeof(watch_list) / sizeof(char*);
 
 static const char* lib_path = "./terminal/libterminal.so";
 static const char* build = "cmake .. && cmake --build .";
@@ -46,8 +50,9 @@ int main(void) {
         };
 
         for (i32 f = 0; f < num_files; ++f) {
-                if (add_file_to_watch_list(&reloader, watch_list[f]) != 0)
+                if (add_file_to_watch_list(&reloader, watch_list[f]) != 0) {
                         return -1;
+                }
         }
 
         i32 err;

@@ -195,17 +195,17 @@ i32 init_hot_reloader(struct hot_reloader* reloader) {
 
 i32 run_hot_reloader(struct hot_reloader* reloader) {
         while (true) {
-                if (should_quit)
+                if (should_quit) {
                         break;
+                }
 
                 enum hot_reload_action action = run_main_loop(reloader);
 
-                if (action == hot_reload_quit)
+                if (action == hot_reload_quit) {
                         break;
-                else if (action == hot_reload_err)
+                } else if (action == hot_reload_err) {
                         return -1;
-                else
-                        continue;
+                }
         }
         return 0;
 }

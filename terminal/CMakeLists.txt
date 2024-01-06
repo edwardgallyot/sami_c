@@ -22,6 +22,9 @@ add_library(terminal
     src/ui/draw/draw.c
     src/ui/colour/colour.c
     src/ui/state/state.c
+    src/ui/attribute/attribute.c
+    src/ui/window/window.c
+    src/ui/layout/layout.c
 )
 
 target_include_directories(terminal

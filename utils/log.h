@@ -7,7 +7,7 @@
 // ERROR macro
 #define ERROR(format, ...)                                     {\
         fprintf(stderr,                                         \
-                "[%s %s] ERROR at %s:%d in %s(): "format,       \
+                "[%s %s] ERROR at %s:%d in %s(): " format,       \
                 __DATE__,                                       \
                 __TIME__,                                       \
                 __FILE__,                                       \
