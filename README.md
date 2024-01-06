@@ -3,9 +3,9 @@ sami c libary
 
 This is the library for the sami plug-in written in ANSI C.
 
-The library is divided into modules that include
+The library is divided into modules that include:
 
-*hot_reload*
+**hot_reload**
 
 This is the hot reloader for devloping sami. 
 
