@@ -2,8 +2,10 @@
 
 #include <stdlib.h>
 
+#include "lib/ncurses/include/curses.h"
 #include "terminal/src/ui/state/state.h"
 #include "utils/log.h"
+
 
 struct state* create_state(void) {
         struct state* state = malloc(sizeof(struct state));
@@ -14,6 +16,7 @@ struct state* create_state(void) {
         state->counter = 0;
         state->needs_clearing = true;
         state->should_quit = false;
+
         return state;
 }
 
@@ -75,6 +78,16 @@ static i32 handle_browse_mode(struct state* state, char c) {
                 ERROR("Can't handle browse mode action: %c, result: %d", c, result);
 
         return result;
+}
+
+i32 update_state(struct state* state) {
+        getmaxyx(stdscr, state->total_rows, state->total_columns);
+
+        if (state->total_rows == -1 || state->total_columns == -1) {
+                return -1;
+        }
+
+        return 0;
 }
 
 i32 state_process_input(struct state* state, char c) {

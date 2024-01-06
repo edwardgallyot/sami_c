@@ -1,4 +1,4 @@
-// Copyright 2023 edg
+// Copyright 2024 edg
 
 #include "lib/ncurses/include/curses.h"
 #include "terminal/src/ui/colour/colour.h"
@@ -11,10 +11,12 @@ i32 terminal_ui_draw(struct ui* ui) {
                 ui->state->needs_clearing = false;
         }
 
+
+
         turn_colour_on(colour_id_purple_fg);
         attron(A_BOLD);
 
-        move(10, 43);
+        move(9, 10);
 
         addstr("Hot reloadable ui\n");
 
@@ -22,13 +24,22 @@ i32 terminal_ui_draw(struct ui* ui) {
 
         attroff(A_BOLD);
 
-        move(0, 0);
+        move(10, 0);
 
         turn_colour_on(colour_id_cyan_fg);
 
         printw("=== counter: %d ===\n", ui->state->counter);
 
         turn_colour_off(colour_id_cyan_fg);
+
+
+        move(20, 20);
+
+        printw("Total num rows: %d,Total num columns: %d", 
+               ui->state->total_rows,
+               ui->state->total_columns);
+
+        move(20, 20);
 
         if (ui->state->should_quit) {
                 addstr("Quit requested");

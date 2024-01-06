@@ -37,8 +37,9 @@ static char handle_std_in_no_block(void) {
         nodelay(stdscr, TRUE);
         int ch = getch();
 
-        if (ch != ERR)
+        if (ch != ERR) {
                 return (char)(ch);
+        }
 
         return '\0';
 }
@@ -56,6 +57,8 @@ static void* ui_thread(void* p) {
 
                 char c = handle_std_in_no_block();
 
+                err = update_state(ui->state);
+
                 err = state_process_input(ui->state, c);
 
                 if (err != 0) {
@@ -69,16 +72,16 @@ static void* ui_thread(void* p) {
                 }
                 
 
-                if (terminal_ui_cancelled(ui))
+                if (terminal_ui_cancelled(ui)) {
                         break;
+                }
 
                 if (ui->state->should_quit) {
-                        endwin();
                         atomic_store_bool(&ui->run, false);
                         break;
                 }
         }
-
+        endwin();
         return NULL;
 }
 
