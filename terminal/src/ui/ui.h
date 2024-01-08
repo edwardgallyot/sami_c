@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "terminal/src/ui/layout/layout.h"
 #include "terminal/src/ui/state/state.h"
 #include "thread/src/thread.h"
 #include "utils/types.h"
@@ -10,10 +11,11 @@
 struct ui {
         struct state* state;
         struct thread* thread;
+        struct layout* layout;
         atomic_bool run;
 };
 
-struct ui* terminal_build_ui();
+struct ui* terminal_build_ui(void);
 
 i32 terminal_run_ui(struct ui* ui);
 

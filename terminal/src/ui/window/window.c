@@ -67,8 +67,8 @@ i32 window_update_dimensions(
         struct window* win,
         i32 height,
         i32 width,
-        i32 x,
-        i32 y
+        i32 y,
+        i32 x
 ) {
         if (win == NULL) {
                 ERROR("Can't update dimensions, win is NULL");
@@ -118,14 +118,19 @@ i32 refresh_window(struct window* win) {
         }
 
         if (win->win == NULL) {
-                win->win = newwin(win->height, win->width, win->x, win->y);
+                win->win = newwin(win->height, win->width, win->y, win->x);
                 return 0;
         } 
 
         if (has_window_dimensions_changed(win)) {
                 reset_inner_window(win);
-                win->win = newwin(win->height, win->width, win->x, win->y);
+                win->win = newwin(win->height, win->width, win->y, win->x);
         }
+
+        // Default box.
+        box(win->win, 0, 0);
+
+        wrefresh(win->win);
 
         return 0;
 }

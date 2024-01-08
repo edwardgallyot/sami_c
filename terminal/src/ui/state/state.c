@@ -20,8 +20,8 @@ struct state* create_state(void) {
         state->cursor_position_y = 0;
         state->cursor_position_x = 0;
 
-        state->total_columns = -1;
-        state->total_rows = -1;
+        state->width = -1;
+        state->height = -1;
 
         return state;
 }
@@ -51,14 +51,14 @@ static i32 handle_browse_mode_left(struct state* state) {
 }
 
 static i32 handle_browse_mode_right(struct state* state) {
-        if (state->cursor_position_x < (state->total_columns - 1)) {
+        if (state->cursor_position_x < (state->width - 1)) {
                 state->cursor_position_x += 1;
         }
         return 0;
 }
 
 static i32 handle_browse_mode_down(struct state* state) {
-        if (state->cursor_position_y < (state->total_rows - 1)) {
+        if (state->cursor_position_y < (state->height - 1)) {
                 state->cursor_position_y += 1;
         }
         return 0;
@@ -101,9 +101,9 @@ static i32 handle_browse_mode(struct state* state, char c) {
 }
 
 i32 update_state(struct state* state) {
-        getmaxyx(stdscr, state->total_rows, state->total_columns);
+        getmaxyx(stdscr, state->height, state->width);
 
-        if (state->total_rows == -1 || state->total_columns == -1) {
+        if (state->height == -1 || state->width == -1) {
                 return -1;
         }
 

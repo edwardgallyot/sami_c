@@ -10,4 +10,8 @@ struct layout {
         struct window* main;
 };
 
-i32 update_layout_from_state(struct state* state);
+struct layout* create_layout(void);
+
+i32 destroy_layout(struct layout* layout);
+
+i32 update_layout_from_state(struct layout* layout, struct state* state);

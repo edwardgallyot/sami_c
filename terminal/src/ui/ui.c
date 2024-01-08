@@ -9,6 +9,7 @@
 #include "terminal/src/ui/ui.h"
 #include "terminal/src/ui/colour/colour.h"
 #include "terminal/src/ui/draw/draw.h"
+#include "terminal/src/ui/layout/layout.h"
 #include "terminal/src/ui/state/state.h"
 #include "thread/src/thread.h"
 #include "utils/log.h"
@@ -16,7 +17,7 @@
 
 static const char* thread_name = "Ui thread";
 
-static const i32 sleep_time_ui = 50000000;
+static const i32 sleep_time_ui = 25000000;
 
 static void terminal_cancel_ui_thread(struct ui* ui) {
         if (atomic_load_bool(&ui->run)) {
@@ -61,6 +62,8 @@ static void* ui_thread(void* p) {
 
                 err = state_process_input(ui->state, c);
 
+                err = update_layout_from_state(ui->layout, ui->state);
+
                 if (err != 0) {
                         ERROR("Error updating state: %d", err);
                 }
@@ -104,6 +107,7 @@ struct ui* terminal_build_ui(void) {
         new_ui->run = false;
         new_ui->thread = NULL;
         new_ui->state = create_state();
+        new_ui->layout = create_layout();
 
         return new_ui;
 }
@@ -142,6 +146,7 @@ i32 terminal_destroy_ui(struct ui* ui) {
 
         join_thread(ui->thread);
         destroy_state(ui->state);
+        destroy_layout(ui->layout);
 
         free(ui);
         ui = NULL;

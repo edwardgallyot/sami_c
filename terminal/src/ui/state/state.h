@@ -5,12 +5,12 @@
 #include "utils/types.h"
 
 enum state_mode {
-        state_mode_browse,
+        state_mode_browse = 0,
         state_mode_input,
 };
 
 enum state_window {
-        state_window_files,
+        state_window_main = 0,
 };
 
 struct state {
@@ -24,8 +24,8 @@ struct state {
         i32 counter;
 
         // The current row and column of the state
-        i32 total_rows;
-        i32 total_columns;
+        i32 height;
+        i32 width;
 
         // The cursor position
         i32 cursor_position_y;
@@ -33,6 +33,9 @@ struct state {
 
         // Current mode of the state
         enum state_mode mode;
+
+        // Current selected window
+        enum state_window current_window;
 };
 
 struct state* create_state(void);

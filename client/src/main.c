@@ -22,6 +22,8 @@ const char* watch_list[] = {
         "../terminal/src/ui/attribute/attribute.c",
         "../terminal/src/ui/window/window.h",
         "../terminal/src/ui/window/window.c",
+        "../terminal/src/ui/layout/layout.h",
+        "../terminal/src/ui/layout/layout.c",
         "../terminal/CMakeLists.txt",
 };
 

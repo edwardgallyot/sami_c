@@ -36,9 +36,9 @@ i32 terminal_ui_draw(struct ui* ui) {
 
         move(20, 20);
 
-        printw("Total num rows: %d,Total num columns: %d", 
-               ui->state->total_rows,
-               ui->state->total_columns);
+        printw("Height: %d. Width: %d.", 
+               ui->state->height,
+               ui->state->width);
 
         move(ui->state->cursor_position_y, ui->state->cursor_position_x);
 
