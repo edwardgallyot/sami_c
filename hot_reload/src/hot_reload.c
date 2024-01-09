@@ -2,8 +2,8 @@
 
 #include <bits/types/struct_timeval.h>
 #include <dlfcn.h>
-#include <errno.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -22,8 +22,6 @@ enum hot_reload_action {
         hot_reload_quit = 1,
         hot_reload_reload = 2,
 };
-
-static void* lib_handle = NULL;
 
 typedef void* (*shared_func)(void*);
 
@@ -49,16 +47,16 @@ static i32 handle_lib_function(struct hot_reloader* hot_reloader, const char* na
         i32 err = 0;
 
 
-        if (lib_handle == NULL) {
-                lib_handle = dlopen(hot_reloader->file, (RTLD_LAZY | RTLD_LOCAL));
+        if (hot_reloader->lib_handle == NULL) {
+                hot_reloader->lib_handle = dlopen(hot_reloader->file, (RTLD_NOW));
         }
 
-        if (!lib_handle) {
-                ERROR("No lib handle at: %p", lib_handle);
+        if (!hot_reloader->lib_handle) {
+                ERROR("No lib handle at: %p", hot_reloader->lib_handle);
                 return -1;
         }
 
-        *(void **) (&func)  = dlsym(lib_handle, name);
+        *(void **) (&func)  = dlsym(hot_reloader->lib_handle, name);
 
         if (func) {
                 hot_reloader->data = func(hot_reloader->data);
@@ -68,26 +66,6 @@ static i32 handle_lib_function(struct hot_reloader* hot_reloader, const char* na
         }
 
         return err;
-}
-
-
-static char handle_stdin() {
-        char input[256];
-
-        memset(input, 0, sizeof(input));
-
-        if (fgets(input, sizeof(input), stdin) == NULL) {
-                return 0;
-        }
-        if (input[0] == 'q') {
-                return 'q';
-        }
-
-        if (input[0] == 'l') {
-                return 'l';
-        }
-
-        return 0;
 }
 
 static enum hot_reload_action check_for_changes_in_watch_list(struct hot_reloader* reloader) {
@@ -108,17 +86,17 @@ static enum hot_reload_action check_for_changes_in_watch_list(struct hot_reloade
                 if ((i64)stats.st_mtime != (i64)item->last_stats.st_mtime) {
                         printf("%s: changed!\n", item->file_path);
                         has_stats_changed = true;
+                        item->last_stats = stats;
                 }
-
-                item->last_stats = stats;
 
                 item = next;
         }
 
-        if (has_stats_changed)
+        if (has_stats_changed) {
                 return hot_reload_reload;
-        else
+        } else {
                 return hot_reload_nothing;
+        }
 }
 
 static enum hot_reload_action handle_file_changes(struct hot_reloader* reloader) {
@@ -129,8 +107,9 @@ static enum hot_reload_action handle_file_changes(struct hot_reloader* reloader)
 static enum hot_reload_action run_main_loop(struct hot_reloader* reloader) {
         i32 err = 0;
 
-        if (err != 0)
-                return err;
+        if (err != 0) {
+                return hot_reload_err;
+        }
 
 
         enum hot_reload_action action = handle_file_changes(reloader);
@@ -146,12 +125,14 @@ static enum hot_reload_action run_main_loop(struct hot_reloader* reloader) {
                         return hot_reload_err;
                 }
         case hot_reload_reload:
-                if (reloader->on_reload)
-                        reloader->on_reload();
 
                 if (system(reloader->build) != 0) {
                         ERROR("Issue with build: %s", reloader->build);
                         return hot_reload_nothing;
+                }
+
+                if (reloader->on_reload) {
+                        reloader->on_reload(reloader);
                 }
 
                 err = handle_lib_function(reloader, reloader->destroy);
@@ -162,8 +143,8 @@ static enum hot_reload_action run_main_loop(struct hot_reloader* reloader) {
                 }
 
 
-                if (dlclose(lib_handle) == 0) {
-                        lib_handle = NULL;
+                if (dlclose(reloader->lib_handle) == 0) {
+                        reloader->lib_handle = NULL;
                         reloader->data = NULL;
                 } else {
                         ERROR("Couldn't close dl: %d: %s", err, dlerror());
@@ -171,9 +152,10 @@ static enum hot_reload_action run_main_loop(struct hot_reloader* reloader) {
 
                 err = handle_lib_function(reloader, reloader->load);
 
-                if (reloader->on_reloaded)
-                        reloader->on_reloaded();
+                if (reloader->on_reloaded) {
 
+                        reloader->on_reloaded(reloader);
+                }
 
                 if (err == 0) {
                         // We've just reloaded so return nothing
@@ -190,7 +172,16 @@ static enum hot_reload_action run_main_loop(struct hot_reloader* reloader) {
 
 i32 init_hot_reloader(struct hot_reloader* reloader) {
         signal(SIGINT, sigint_handle);
-        return handle_lib_function(reloader, reloader->load);
+        i32 err =  handle_lib_function(reloader, reloader->load);
+        if (err != 0) {
+                return err;
+        }
+
+        if (reloader->on_reloaded != NULL) {
+                reloader->on_reloaded(reloader);
+        }
+        
+        return 0;
 }
 
 i32 run_hot_reloader(struct hot_reloader* reloader) {
@@ -268,8 +259,8 @@ i32 clean_hot_reloader(struct hot_reloader* reloader) {
                 return -1;
         }
 
-        if (lib_handle) {
-                dlclose(lib_handle);
+        if (reloader->lib_handle) {
+                dlclose(reloader->lib_handle);
         }
 
         watch_list_item* item = reloader->watch_list;

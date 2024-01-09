@@ -44,6 +44,9 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries")
 
 set(SAMI_HOT_RELOAD ON CACHE BOOL "Enable sami hot reloading")
 
+set(PA_USE_JACK ON CACHE BOOL "Enable sami hot reloading")
+set(PA_USE_PULSE_AUDIO ON CACHE BOOL "Enable sami hot reloading")
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
   # Set the possible values of build type for cmake-gui

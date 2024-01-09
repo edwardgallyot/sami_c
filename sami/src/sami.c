@@ -12,8 +12,9 @@ i32 sami_destroy_engine(struct sami_engine* engine) {
 }
 
 void* sami_engine_reload(void* engine) {
-        if (engine != NULL)
+        if (engine != NULL) {
                 sami_destroy_engine(engine);
+        }
 
         struct sami_engine* eng = sami_create_engine();
         return eng;

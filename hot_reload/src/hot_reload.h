@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include "utils/types.h"
 
-typedef void(*on_reload_callback)(void);
+typedef void(*on_reload_callback)(void*);
 
 typedef struct watch_list_item {
         const char* file_path;
@@ -24,6 +24,9 @@ struct hot_reloader {
 
         // state
         void* data;
+
+        // lib_handle
+        void* lib_handle;
 
         // callbacks
         on_reload_callback on_reload;
